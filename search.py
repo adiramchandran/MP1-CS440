@@ -77,7 +77,7 @@ def bfs(maze):
     prev[start] = None          # no previous for starting coordinate
     visited.append(start)
     dot_coord = None            # coordinate of dot (objective)
-    while !(q.empty()):
+    while q.empty() is not True:
         v = q.get()
         if isObjective(maze, v[0], v[1]):   # check if dot is found
             dot_coord = v                   # update coordinate of dot
@@ -91,7 +91,7 @@ def bfs(maze):
     path = []
     path.append(dot_coord)
     p = prev[dot_coord]
-    while p != None:
+    while p is not None:
         path.append(p)
         p = prev[p]
     path = path[::-1]
