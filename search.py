@@ -14,7 +14,7 @@ within this file -- the unrevised staff files will be used for all other
 files and classes when code is run, so be careful to not modify anything else.
 """
 
-from maze import Maze
+from maze import *
 import Queue as queue
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
@@ -68,7 +68,7 @@ def bfs(maze):
     # return path, num_states_explored
     # getNeighbors(maze, row, col) --> give us coordinates to place into the queue/path
     # getStart(maze) --> gives us first coordinates
-    start = maze.getStart(maze)
+    start = maze.getStart()
     q = queue.Queue()
     num_states_explored = 0
     visited = []
@@ -79,10 +79,10 @@ def bfs(maze):
     dot_coord = None            # coordinate of dot (objective)
     while q.empty() is not True:
         v = q.get()
-        if maze.isObjective(maze, v[0], v[1]):   # check if dot is found
+        if misObjective(maze, v[0], v[1]):   # check if dot is found
             dot_coord = v                   # update coordinate of dot
             break
-        for i in maze.getNeighbors(maze, v[0], v[1]):
+        for i in getNeighbors(maze, v[0], v[1]):
             if i not in visited:
                 q.put(i)
                 prev[i] = v    # set previous node for each visited node
