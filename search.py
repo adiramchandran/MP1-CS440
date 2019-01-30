@@ -16,6 +16,7 @@ files and classes when code is run, so be careful to not modify anything else.
 
 from maze import *
 import Queue as queue
+from pythonds.basic.stack import Stack
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
 # to the positions of the path taken by your search algorithm.
@@ -72,17 +73,17 @@ def bfs(maze):
     q = queue.Queue()
     num_states_explored = 0
     visited = []
-    prev = []
+    prev = {}
     q.put(start)
     prev[start] = None          # no previous for starting coordinate
     visited.append(start)
     dot_coord = None            # coordinate of dot (objective)
     while q.empty() is not True:
         v = q.get()
-        if misObjective(maze, v[0], v[1]):   # check if dot is found
+        if maze.isObjective(v[0], v[1]):   # check if dot is found
             dot_coord = v                   # update coordinate of dot
             break
-        for i in getNeighbors(maze, v[0], v[1]):
+        for i in maze.getNeighbors(v[0], v[1]):
             if i not in visited:
                 q.put(i)
                 prev[i] = v    # set previous node for each visited node
@@ -101,8 +102,37 @@ def bfs(maze):
 def dfs(maze):
     # TODO: Write your code here
     # return path, num_states_explored
-    return [], 0
+    # getNeighbors(maze, row, col) --> give us coordinates to place into the queue/path
+    # getStart(maze) --> gives us first coordinates
+    start = maze.getStart()
+    stack = Stack()
+    num_states_explored = 0
+    visited = []
+    prev = {}
+    stack.push(start)
+    prev[start] = None          # no previous for starting coordinate
+    visited.append(start)
+    dot_coord = None            # coordinate of dot (objective)
+    while stack.isEmpty() is not True:
+        v = stack.pop()
+        if maze.isObjective(v[0], v[1]):   # check if dot is found
+            dot_coord = v                   # update coordinate of dot
+            break
+        for i in maze.getNeighbors(v[0], v[1]):
+            if i not in visited:
+                stack.push(i)
+                prev[i] = v    # set previous node for each visited node
+                visited.append(i)
 
+    path = []
+    path.append(dot_coord)
+    p = prev[dot_coord]
+    while p is not None:
+        path.append(p)
+        p = prev[p]
+    path = path[::-1]
+    num_states_explored = len(visited)
+    return path, num_states_explored
 
 def greedy(maze):
     # TODO: Write your code here
