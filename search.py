@@ -68,7 +68,7 @@ def bfs(maze):
     # return path, num_states_explored
     # getNeighbors(maze, row, col) --> give us coordinates to place into the queue/path
     # getStart(maze) --> gives us first coordinates
-    start = getStart(maze)
+    start = maze.getStart(maze)
     q = queue.Queue()
     num_states_explored = 0
     visited = []
@@ -79,10 +79,10 @@ def bfs(maze):
     dot_coord = None            # coordinate of dot (objective)
     while q.empty() is not True:
         v = q.get()
-        if isObjective(maze, v[0], v[1]):   # check if dot is found
+        if maze.isObjective(maze, v[0], v[1]):   # check if dot is found
             dot_coord = v                   # update coordinate of dot
             break
-        for i in getNeighbors(maze, v[0], v[1]):
+        for i in maze.getNeighbors(maze, v[0], v[1]):
             if i not in visited:
                 q.put(i)
                 prev[i] = v    # set previous node for each visited node
