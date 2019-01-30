@@ -14,7 +14,7 @@ within this file -- the unrevised staff files will be used for all other
 files and classes when code is run, so be careful to not modify anything else.
 """
 
-from maze import *
+from maze import getStart, getNeighbors, isObjective
 import Queue as queue
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
