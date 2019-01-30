@@ -15,7 +15,7 @@ files and classes when code is run, so be careful to not modify anything else.
 """
 
 from maze import *
-import queue
+import Queue as queue
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
 # to the positions of the path taken by your search algorithm.
