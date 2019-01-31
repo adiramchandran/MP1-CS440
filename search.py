@@ -15,8 +15,7 @@ files and classes when code is run, so be careful to not modify anything else.
 """
 
 from maze import *
-import Queue as queue
-from pythonds.basic.stack import Stack
+import queue as queue
 import heapq
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
@@ -74,22 +73,22 @@ def dfs(maze):
     # getNeighbors(maze, row, col) --> give us coordinates to place into the queue/path
     # getStart(maze) --> gives us first coordinates
     start = maze.getStart()
-    stack = Stack()
+    stack = []
     num_states_explored = 0
     visited = []
     prev = {}
-    stack.push(start)
+    stack.append(start)
     prev[start] = None          # no previous for starting coordinate
     visited.append(start)
     dot_coord = None            # coordinate of dot (objective)
-    while stack.isEmpty() is not True:
+    while len(stack):
         v = stack.pop()
         if maze.isObjective(v[0], v[1]):    # check if dot is found
             dot_coord = v                   # update coordinate of dot
             break
         for i in maze.getNeighbors(v[0], v[1]):
             if i not in visited:
-                stack.push(i)
+                stack.append(i)
                 prev[i] = v    # set previous node for each visited node
                 visited.append(i)
 
@@ -178,8 +177,34 @@ def astar(maze):
         e) push q on the closed list
         end (while loop)
     """
-
-    return [], 0
+    start = maze.getStart()
+    dot_coord = maze.getObjectives()[0] # only 1 dot, so first entry is correct
+    start_node = (start, manhattan(start, dot_coord))
+    h = []
+    h.append(start_node)
+    heapq.heapify(h)    # priority queue initialized
+    # hold parents dictionary: if key exists, node has been visited. val is parent
+    parents = {}
+    parents[start] = None
+    while h:
+        min = heapq.heappop(h)[0]
+        if maze.isObjective(min[0], min[1]):
+            break
+        for i in maze.getNeighbors(min[0], min[1]):
+            if i not in parents.keys():
+                add_node = (i, manhattan(i, dot_coord) + manhattan(start, i))
+                heapq.heappush(h, add_node)
+                parents[i] = min
+    path = []
+    path.append(dot_coord)
+    p = parents[dot_coord]
+    while p is not None:
+        path.append(p)
+        p = parents[p]
+    path = path[::-1]
+    num_states_explored = len(parents)
+    return path, num_states_explored
 
 def manhattan(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
