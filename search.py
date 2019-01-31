@@ -17,6 +17,8 @@ files and classes when code is run, so be careful to not modify anything else.
 from maze import *
 import Queue as queue
 from pythonds.basic.stack import Stack
+import heapq
+from utils import manhattan
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
 # to the positions of the path taken by your search algorithm.
@@ -32,38 +34,6 @@ def search(maze, searchMethod):
         "astar": astar,
     }.get(searchMethod)(maze)
 
-"""
-    # Function to print a BFS of graph
-    def BFS(self, s):
-
-        # Mark all the vertices as not visited
-        visited = [False] * (len(self.graph))
-
-        # Create a queue for BFS
-        queue = []
-
-        # Mark the source node as
-        # visited and enqueue it
-        queue.append(s)
-        visited[s] = True
-
-        while queue:
-
-            # Dequeue a vertex from
-            # queue and print it
-            s = queue.pop(0)
-            print (s, end = " ")
-
-            # Get all adjacent vertices of the
-            # dequeued vertex s. If a adjacent
-            # has not been visited, then mark it
-            # visited and enqueue it
-            for i in self.graph[s]:
-                if visited[i] == False:
-                    queue.append(i)
-                    visited[i] = True
-https://crab.rutgers.edu/~guyk/BFS.pdf
-"""
 def bfs(maze):
     # TODO: Write your code here
     # return path, num_states_explored
@@ -115,7 +85,7 @@ def dfs(maze):
     dot_coord = None            # coordinate of dot (objective)
     while stack.isEmpty() is not True:
         v = stack.pop()
-        if maze.isObjective(v[0], v[1]):   # check if dot is found
+        if maze.isObjective(v[0], v[1]):    # check if dot is found
             dot_coord = v                   # update coordinate of dot
             break
         for i in maze.getNeighbors(v[0], v[1]):
@@ -137,8 +107,33 @@ def dfs(maze):
 def greedy(maze):
     # TODO: Write your code here
     # return path, num_states_explored
-    return [], 0
-
+    start = maze.getStart()
+    dot_coord = maze.getObjectives()[0] # only 1 dot, so first entry is correct
+    start_node = (start, manhattan(start, dot_coord))
+    h = []
+    h.append(start_node)
+    heapq.heapify(h)    # priority queue initialized
+    # hold parents dictionary: if key exists, node has been visited. val is parent
+    parents = {}
+    parents[start] = None
+    while h:
+        min = heapq.heappop(h)
+        if maze.isObjective(min[0], min[1]):
+            break
+        for i in maze.getNeighbors(min[0], min[1]):
+            if i not in parents.keys():
+                add_node = (i, manhattan(i, dot_coord))
+                heapq.heappush(h, add_node)
+                parents[i] = v
+    path = []
+    path.append(dot_coord)
+    p = parents[dot_coord]
+    while p is not None:
+        path.append(p)
+        p = parents[p]
+    path = path[::-1]
+    num_states_explored = len(visited)
+    return path, num_states_explored
 
 def astar(maze):
     # TODO: Write your code here
