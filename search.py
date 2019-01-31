@@ -17,6 +17,7 @@ files and classes when code is run, so be careful to not modify anything else.
 from maze import *
 import queue as queue
 import heapq
+from collections import defaultdict
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
 # to the positions of the path taken by your search algorithm.
@@ -179,22 +180,36 @@ def astar(maze):
     """
     start = maze.getStart()
     dot_coord = maze.getObjectives()[0] # only 1 dot, so first entry is correct
+    closedSet = []
+    openSet = []
     start_node = (start, manhattan(start, dot_coord))
-    h = []
-    h.append(start_node)
-    heapq.heapify(h)    # priority queue initialized
-    # hold parents dictionary: if key exists, node has been visited. val is parent
+    openSet.append(start_node)
+    heapq.heapify(openSet) 
     parents = {}
     parents[start] = None
-    while h:
-        min = heapq.heappop(h)[0]
-        if maze.isObjective(min[0], min[1]):
+    gScore = defaultdict(lambda: float('inf'))
+    gScore[start] = 0
+    fScore = defaultdict(lambda: float('inf'))
+    fScore[start] = manhattan(start, dot_coord)
+    while len(openSet) != 0:
+        curr = heapq.heappop(openSet)[0]
+        if maze.isObjective(curr[0], curr[1]):
             break
-        for i in maze.getNeighbors(min[0], min[1]):
-            if i not in parents.keys():
-                add_node = (i, manhattan(i, dot_coord) + manhattan(start, i))
-                heapq.heappush(h, add_node)
-                parents[i] = min
+        closedSet.append(curr)
+        for i in maze.getNeighbors(curr[0], curr[1]):
+            if i in closedSet:
+                continue
+            tentative_gScore = gScore[curr] + manhattan(curr, i)
+            if i not in openSet:
+                parents[i] = curr
+                gScore[i] = tentative_gScore
+                fScore[i] = gScore[i] + manhattan(i, dot_coord)
+                add_node = (i, fScore[i])
+                openSet.append(add_node)
+                heapq.heapify(openSet)
+            elif tentative_gScore >= gScore[i]:
+                continue;
+
     path = []
     path.append(dot_coord)
     p = parents[dot_coord]
