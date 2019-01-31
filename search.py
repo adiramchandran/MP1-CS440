@@ -108,7 +108,7 @@ def greedy(maze):
     # return path, num_states_explored
     start = maze.getStart()
     dot_coord = maze.getObjectives()[0] # only 1 dot, so first entry is correct
-    start_node = (start, manhattan(start, dot_coord))
+    start_node = (manhattan(start, dot_coord), start)
     h = []
     h.append(start_node)
     heapq.heapify(h)    # priority queue initialized
@@ -116,12 +116,12 @@ def greedy(maze):
     parents = {}
     parents[start] = None
     while h:
-        min = heapq.heappop(h)[0]
+        min = heapq.heappop(h)[1]
         if maze.isObjective(min[0], min[1]):
             break
         for i in maze.getNeighbors(min[0], min[1]):
             if i not in parents.keys():
-                add_node = (i, manhattan(i, dot_coord))
+                add_node = (manhattan(i, dot_coord), i)
                 heapq.heappush(h, add_node)
                 parents[i] = min
     path = []
@@ -182,9 +182,9 @@ def astar(maze):
     dot_coord = maze.getObjectives()[0] # only 1 dot, so first entry is correct
     closedSet = []
     openSet = []
-    start_node = (start, manhattan(start, dot_coord))
+    start_node = (manhattan(start, dot_coord), start)
     openSet.append(start_node)
-    heapq.heapify(openSet) 
+    heapq.heapify(openSet)
     parents = {}
     parents[start] = None
     gScore = defaultdict(lambda: float('inf'))
@@ -192,7 +192,7 @@ def astar(maze):
     fScore = defaultdict(lambda: float('inf'))
     fScore[start] = manhattan(start, dot_coord)
     while len(openSet) != 0:
-        curr = heapq.heappop(openSet)[0]
+        curr = heapq.heappop(openSet)[1]
         if maze.isObjective(curr[0], curr[1]):
             break
         closedSet.append(curr)
@@ -204,7 +204,7 @@ def astar(maze):
                 parents[i] = curr
                 gScore[i] = tentative_gScore
                 fScore[i] = gScore[i] + manhattan(i, dot_coord)
-                add_node = (i, fScore[i])
+                add_node = (fScore[i], i)
                 openSet.append(add_node)
                 heapq.heapify(openSet)
             elif tentative_gScore >= gScore[i]:
@@ -222,4 +222,3 @@ def astar(maze):
 
 def manhattan(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
-
