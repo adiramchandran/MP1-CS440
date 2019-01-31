@@ -18,7 +18,6 @@ from maze import *
 import Queue as queue
 from pythonds.basic.stack import Stack
 import heapq
-from utils import manhattan
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
 # to the positions of the path taken by your search algorithm.
@@ -117,14 +116,14 @@ def greedy(maze):
     parents = {}
     parents[start] = None
     while h:
-        min = heapq.heappop(h)
+        min = heapq.heappop(h)[0]
         if maze.isObjective(min[0], min[1]):
             break
         for i in maze.getNeighbors(min[0], min[1]):
             if i not in parents.keys():
                 add_node = (i, manhattan(i, dot_coord))
                 heapq.heappush(h, add_node)
-                parents[i] = v
+                parents[i] = min
     path = []
     path.append(dot_coord)
     p = parents[dot_coord]
@@ -132,10 +131,13 @@ def greedy(maze):
         path.append(p)
         p = parents[p]
     path = path[::-1]
-    num_states_explored = len(visited)
+    num_states_explored = len(parents)
     return path, num_states_explored
 
 def astar(maze):
     # TODO: Write your code here
     # return path, num_states_explored
     return [], 0
+
+def manhattan(a, b):
+    return abs(b[0] - a[0]) + abs(b[1] - a[1])
