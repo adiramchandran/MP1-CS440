@@ -18,6 +18,7 @@ from maze import *
 import queue as queue
 import heapq
 from collections import defaultdict
+import math
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
 # to the positions of the path taken by your search algorithm.
@@ -137,47 +138,9 @@ def greedy(maze):
 def astar(maze):
     # TODO: Write your code here
     # return path, num_states_explored
-    """
-    // A* Search Algorithm
-    1.  Initialize the open list
-    2.  Initialize the closed list
-        put the starting node on the open
-        list (you can leave its f at zero)
+    if len(maze.getObjectives()) > 1:
+        return mult_astar(maze)
 
-    3.  while the open list is not empty
-        a) find the node with the least f on
-           the open list, call it "q"
-
-        b) pop q off the open list
-
-        c) generate q's 8 successors and set their
-           parents to q
-
-        d) for each successor
-            i) if successor is the goal, stop search
-              successor.g = q.g + distance between
-                                  successor and q
-              successor.h = distance from goal to
-              successor (This can be done using many
-              ways, we will discuss three heuristics-
-              Manhattan, Diagonal and Euclidean
-              Heuristics)
-
-              successor.f = successor.g + successor.h
-
-            ii) if a node with the same position as
-                successor is in the OPEN list which has a
-               lower f than successor, skip this successor
-
-            iii) if a node with the same position as
-                successor  is in the CLOSED list which has
-                a lower f than successor, skip this successor
-                otherwise, add  the node to the open list
-         end (for loop)
-
-        e) push q on the closed list
-        end (while loop)
-    """
     start = maze.getStart()
     dot_coord = maze.getObjectives()[0] # only 1 dot, so first entry is correct
     closedSet = []
@@ -220,5 +183,61 @@ def astar(maze):
     num_states_explored = len(parents)
     return path, num_states_explored
 
+def mult_astar(maze):
+    start = maze.getStart()
+    dots = maze.getObjectives()
+    closedSet = []
+    openSet = []
+    start_node = (manhattan(start, dot_coord), start)
+    openSet.append(start_node)
+    heapq.heapify(openSet)
+    parents = {}
+    parents[start] = None
+    gScore = defaultdict(lambda: float('inf'))
+    gScore[start] = 0
+    fScore = defaultdict(lambda: float('inf'))
+    fScore[start] = manhattan(start, dot_coord)
+    while len(openSet) != 0:
+        curr = heapq.heappop(openSet)[1]
+        if maze.isObjective(curr[0], curr[1]):
+            break
+        closedSet.append(curr)
+        for i in maze.getNeighbors(curr[0], curr[1]):
+            if i in closedSet:
+                continue
+            tentative_gScore = gScore[curr] + manhattan(curr, i)
+            if i not in openSet:
+                parents[i] = curr
+                gScore[i] = tentative_gScore
+                fScore[i] = gScore[i] + manhattan(i, dot_coord)
+                add_node = (fScore[i], i)
+                openSet.append(add_node)
+                heapq.heapify(openSet)
+            elif tentative_gScore >= gScore[i]:
+                continue;
+
+    path = []
+    path.append(dot_coord)
+    p = parents[dot_coord]
+    while p is not None:
+        path.append(p)
+        p = parents[p]
+    path = path[::-1]
+    num_states_explored = len(parents)
+    return path, num_states_explored
+
 def manhattan(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+"""
+returns closest dot to param node start
+"""
+def closest_obj(start, objs):
+    min = math.inf
+    ret = None
+    for obj in objs:
+        dist = manhattan(start, obj)
+        if min > dist:
+            min = dist
+            ret = obj
+    return ret
