@@ -60,7 +60,7 @@ def bfs(maze):
                 prev[i] = v    # set previous node for each visited node
                 visited.append(i)
 
-    path = get_path(dot_coord, parents)
+    path = get_path(dot_coord, prev)
     num_states_explored = len(visited)
     return path, num_states_explored
 
@@ -89,7 +89,7 @@ def dfs(maze):
                 prev[i] = v    # set previous node for each visited node
                 visited.append(i)
 
-    path = get_path(dot_coord, parents)
+    path = get_path(dot_coord, prev)
     num_states_explored = len(visited)
     return path, num_states_explored
 
@@ -197,7 +197,7 @@ def mult_astar_helper(maze, dot_list):
             path.extend(get_path(dot_coord, parents))
             parents[dot_coord] = None   # so get_path has a new spot to stop at
             dot_idx += 1
-            if dot_idx == len(dot_list) -1:
+            if dot_idx == len(dot_list)-1:
                 break
             dot_coord = dot_list[dot_idx]
         closedSet.append(curr)
