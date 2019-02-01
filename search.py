@@ -19,7 +19,7 @@ import queue as queue
 import heapq
 from collections import defaultdict
 import math
-from itertools import permutations 
+from itertools import permutations
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
 # to the positions of the path taken by your search algorithm.
@@ -60,13 +60,7 @@ def bfs(maze):
                 prev[i] = v    # set previous node for each visited node
                 visited.append(i)
 
-    path = []
-    path.append(dot_coord)
-    p = prev[dot_coord]
-    while p is not None:
-        path.append(p)
-        p = prev[p]
-    path = path[::-1]
+    path = get_path(dot_coord, parents)
     num_states_explored = len(visited)
     return path, num_states_explored
 
@@ -95,13 +89,7 @@ def dfs(maze):
                 prev[i] = v    # set previous node for each visited node
                 visited.append(i)
 
-    path = []
-    path.append(dot_coord)
-    p = prev[dot_coord]
-    while p is not None:
-        path.append(p)
-        p = prev[p]
-    path = path[::-1]
+    path = get_path(dot_coord, parents)
     num_states_explored = len(visited)
     return path, num_states_explored
 
@@ -126,13 +114,8 @@ def greedy(maze):
                 add_node = (manhattan(i, dot_coord), i)
                 heapq.heappush(h, add_node)
                 parents[i] = min
-    path = []
-    path.append(dot_coord)
-    p = parents[dot_coord]
-    while p is not None:
-        path.append(p)
-        p = parents[p]
-    path = path[::-1]
+
+    path = get_path(dot_coord, parents)
     num_states_explored = len(parents)
     return path, num_states_explored
 
@@ -174,29 +157,23 @@ def astar(maze):
             elif tentative_gScore >= gScore[i]:
                 continue;
 
-    path = []
-    path.append(dot_coord)
-    p = parents[dot_coord]
-    while p is not None:
-        path.append(p)
-        p = parents[p]
-    path = path[::-1]
+    path = get_path(dot_coord, parents)
     num_states_explored = len(parents)
     return path, num_states_explored
 
 def mult_astar(maze):
-
-    start = maze.getStart()
-    all_paths = {}
     dots = maze.getObjectives()
-    perm = permutations(dots) 
-    min_dist = 
-    for i in list(perm): 
-        sum_dist = 0
-        path, length = mult_astar_helper(maze, i)
-        all_paths[path] = length
-    
-    return [], 0
+    perm = permutations(dots)
+    min_dist = math.inf
+    min_path = []
+    min_num_states = 0
+    for i in perm:
+        path, length, num_states_explored = mult_astar_helper(maze, i)
+        if min_dist > length:
+            min_path = path
+            min_num_states = num_states_explored
+
+    return min_path, num_states_explored
 
 def mult_astar_helper(maze, dot_list):
     dot_idx = 0
@@ -213,9 +190,12 @@ def mult_astar_helper(maze, dot_list):
     gScore[start] = 0
     fScore = defaultdict(lambda: float('inf'))
     fScore[start] = manhattan(start, dot_coord)
+    path = []
     while len(openSet) != 0:
         curr = heapq.heappop(openSet)[1]
         if (curr[0], curr[1]) == dot_coord:
+            path.extend(get_path(dot_coord, parents))
+            parents[dot_coord] = None   # so get_path has a new spot to stop at
             dot_idx += 1
             if dot_idx == len(dot_list) -1:
                 break
@@ -235,18 +215,22 @@ def mult_astar_helper(maze, dot_list):
             elif tentative_gScore >= gScore[i]:
                 continue;
 
+    #path = get_path(dot_coord, parents)
+    num_states_explored = len(parents)
+    return path, len(path), num_states_explored
+
+def manhattan(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+def get_path(dot, parents):
     path = []
-    path.append(dot_coord)
-    p = parents[dot_coord]
+    path.append(dot)
+    p = parents[dot]
     while p is not None:
         path.append(p)
         p = parents[p]
     path = path[::-1]
-    num_states_explored = len(parents)
-    return path, len(path)
-
-def manhattan(a, b):
-    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    return path
 
 """
 returns closest dot to param node start
@@ -260,8 +244,6 @@ def closest_obj(start, objs):
             min = dist
             ret = obj
     return ret
-
-def getNodeNumber(maze):
 
 def numNodes(maze):
     num = maze.getDimensions()[0]*maze.getDimensions()[1]
