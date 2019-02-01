@@ -168,11 +168,11 @@ def mult_astar(maze):
     min_path = []
     min_num_states = 0
     for i in perm:
+        i = list(i)
         path, length, num_states_explored = mult_astar_helper(maze, i)
         if min_dist > length:
             min_path = path
             min_num_states = num_states_explored
-
     return min_path, num_states_explored
 
 def mult_astar_helper(maze, dot_list):
