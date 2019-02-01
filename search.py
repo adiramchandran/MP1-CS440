@@ -19,6 +19,7 @@ import queue as queue
 import heapq
 from collections import defaultdict
 import math
+from itertools import permutations 
 # Search should return the path and the number of states explored.
 # The path should be a list of tuples in the form (row, col) that correspond
 # to the positions of the path taken by your search algorithm.
@@ -184,8 +185,23 @@ def astar(maze):
     return path, num_states_explored
 
 def mult_astar(maze):
+
     start = maze.getStart()
+    all_paths = {}
     dots = maze.getObjectives()
+    perm = permutations(dots) 
+    min_dist = 
+    for i in list(perm): 
+        sum_dist = 0
+        path, length = mult_astar_helper(maze, i)
+        all_paths[path] = length
+    
+    return [], 0
+
+def mult_astar_helper(maze, dot_list):
+    dot_idx = 0
+    dot_coord = dot_list[dot_idx]
+    start = maze.getStart()
     closedSet = []
     openSet = []
     start_node = (manhattan(start, dot_coord), start)
@@ -199,8 +215,11 @@ def mult_astar(maze):
     fScore[start] = manhattan(start, dot_coord)
     while len(openSet) != 0:
         curr = heapq.heappop(openSet)[1]
-        if maze.isObjective(curr[0], curr[1]):
-            break
+        if (curr[0], curr[1]) == dot_coord:
+            dot_idx += 1
+            if dot_idx == len(dot_list) -1:
+                break
+            dot_coord = dot_list[dot_idx]
         closedSet.append(curr)
         for i in maze.getNeighbors(curr[0], curr[1]):
             if i in closedSet:
@@ -224,7 +243,7 @@ def mult_astar(maze):
         p = parents[p]
     path = path[::-1]
     num_states_explored = len(parents)
-    return path, num_states_explored
+    return path, len(path)
 
 def manhattan(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -241,3 +260,8 @@ def closest_obj(start, objs):
             min = dist
             ret = obj
     return ret
+
+def getNodeNumber(maze):
+
+def numNodes(maze):
+    num = maze.getDimensions()[0]*maze.getDimensions()[1]
