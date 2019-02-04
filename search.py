@@ -161,19 +161,84 @@ def astar(maze):
     num_states_explored = len(parents)
     return path, num_states_explored
 
+def mult_astar_between_goals(maze, start, goal):
+    start = start
+    closedSet = []
+    openSet = []
+    start_node = (manhattan(start, goal), start)
+    openSet.append(start_node)
+    heapq.heapify(openSet)
+    parents = {}
+    parents[start] = None
+    gScore = defaultdict(lambda: float('inf'))
+    gScore[start] = 0
+    fScore = defaultdict(lambda: float('inf'))
+    fScore[start] = manhattan(start, goal)
+    while len(openSet) != 0:
+        curr = heapq.heappop(openSet)[1]
+        if curr == goal:
+            break
+        closedSet.append(curr)
+        for i in maze.getNeighbors(curr[0], curr[1]):
+            if i in closedSet:
+                continue
+            tentative_gScore = gScore[curr] + manhattan(curr, i)
+            if i not in openSet:
+                parents[i] = curr
+                gScore[i] = tentative_gScore
+                fScore[i] = gScore[i] + manhattan(i, goal)
+                add_node = (fScore[i], i)
+                openSet.append(add_node)
+                heapq.heapify(openSet)
+            elif tentative_gScore >= gScore[i]:
+                continue;
+
+    path = []
+    path.append(goal)
+    p = parents[goal]
+    while p is not None:
+        path.append(p)
+        p = parents[p]
+    path = path[::-1]
+    num_states_explored = len(parents)
+    return path, num_states_explored
+
 def mult_astar(maze):
-    dots = maze.getObjectives()
-    perm = permutations(dots)
-    min_dist = math.inf
-    min_path = []
-    min_num_states = 0
-    for i in perm:
-        i = list(i)
-        path, length, num_states_explored = mult_astar_helper(maze, i)
-        if min_dist > length:
-            min_path = path
-            min_num_states = num_states_explored
-    return min_path, num_states_explored
+    start = maze.getStart()
+    dot_list = maze.getObjectives()
+    order = []
+    order.append(start)
+    curr_end = None
+    while len(dot_list) != 0:
+        min_curr_path = float('inf')
+        for i in dot_list:
+            path, num_states_explored = mult_astar_between_goals(maze, start, i)
+            if min_curr_path > len(path):
+                min_path = path
+                min_num_states = num_states_explored
+                curr_end = i
+        order.append(curr_end)
+        dot_list.remove(curr_end)
+        start = curr_end
+    print(order)
+    return mult_astar_helper(maze, order)
+
+# def mult_astar(maze):
+#     dots = maze.getObjectives()
+#     perm = permutations(dots)
+#     min_dist = math.inf
+#     min_path = []
+#     min_num_states = 0
+#     count = 1
+#     for i in perm:
+#         print(count)
+#         count += 1
+#         i = list(i)
+#         path, length, num_states_explored = mult_astar_helper(maze, i)
+#         if min_dist > length:
+#             min_path = path
+#             min_num_states = num_states_explored
+#     return min_path, num_states_explored
 
 def mult_astar_helper(maze, dot_list):
     dot_idx = 0
@@ -193,9 +258,8 @@ def mult_astar_helper(maze, dot_list):
     path = []
     while len(openSet) != 0:
         curr = heapq.heappop(openSet)[1]
-        if (curr[0], curr[1]) == dot_coord:
+        if curr == dot_coord:
             path.extend(get_path(dot_coord, parents))
-            parents[dot_coord] = None   # so get_path has a new spot to stop at
             dot_idx += 1
             if dot_idx == len(dot_list)-1:
                 break
@@ -217,7 +281,7 @@ def mult_astar_helper(maze, dot_list):
 
     #path = get_path(dot_coord, parents)
     num_states_explored = len(parents)
-    return path, len(path), num_states_explored
+    return path, num_states_explored
 
 def manhattan(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
