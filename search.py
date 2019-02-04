@@ -209,6 +209,8 @@ def mult_astar(maze):
     order = []
     order.append(start)
     curr_end = None
+    total_path = []
+    total_path.append(start)
     while len(dot_list) != 0:
         min_curr_path = float('inf')
         for i in dot_list:
@@ -220,8 +222,15 @@ def mult_astar(maze):
         order.append(curr_end)
         dot_list.remove(curr_end)
         start = curr_end
-    print(order)
-    return mult_astar_helper(maze, order)
+    total_states_explored = 0
+    start = maze.getStart()
+    for i in order:
+        path, num_states_explored = mult_astar_between_goals(maze, start, i)
+        total_path.extend(path[1:])
+        total_states_explored += num_states_explored
+        start = i
+    print(total_path)
+    return total_path, total_states_explored
 
 # def mult_astar(maze):
 #     dots = maze.getObjectives()
